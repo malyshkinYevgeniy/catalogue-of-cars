@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.addPost:
+                new AddAdvertisementDialog().show(getSupportFragmentManager(), "add advertisement from MainActivity");
                 return true;
             case R.id.fav:
                 isFavFilterSelected = !isFavFilterSelected;
