@@ -34,7 +34,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.Objects;
 
-import auto.app.model.Advertisment;
+import auto.app.model.Advertisement;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -87,8 +87,8 @@ public class AddAdvertisementDialog extends BottomSheetDialogFragment {
                     Bundle bundle = getArguments();
                     pd = new ProgressDialog(dialog.getContext());
                     pd.setMessage("Пожалуйста, подождите . . .");
-//                    pd.setCancelable(false);
-//                    pd.show();
+                    pd.setCancelable(false);
+                    pd.show();
                     uploadData();
 
                 }
@@ -173,10 +173,10 @@ public class AddAdvertisementDialog extends BottomSheetDialogFragment {
                         while (!urlTask.isSuccessful()) {
                         }
                         String downloadUrl = Objects.requireNonNull(urlTask.getResult()).toString();
-                        Advertisment advertisment = new Advertisment(Objects.requireNonNull(title.getEditText()).getText().toString(), Objects.requireNonNull(price.getEditText()).getText().toString(), Objects.requireNonNull(description.getEditText()).getText().toString(), downloadUrl);
+                        Advertisement advertisement = new Advertisement(Objects.requireNonNull(title.getEditText()).getText().toString(), Objects.requireNonNull(price.getEditText()).getText().toString(), Objects.requireNonNull(description.getEditText()).getText().toString(), downloadUrl);
                         String advId = mDatabaseRef.push().getKey();
                         if (advId != null) {
-                            mDatabaseRef.child(advId).setValue(advertisment);
+                            mDatabaseRef.child(advId).setValue(advertisement);
                             Toast.makeText(view.getContext(), "Объявление добавлено", Toast.LENGTH_SHORT).show();
                             dismiss();
                         } else

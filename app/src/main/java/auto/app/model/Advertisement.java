@@ -2,7 +2,7 @@ package auto.app.model;
 
 import com.google.firebase.database.Exclude;
 
-public class Advertisment {
+public class Advertisement {
     private String mTitle;
     private String mPrice;
     private String mDescription;
@@ -10,10 +10,10 @@ public class Advertisment {
     private Boolean isFav;
     private String key;
 
-    public Advertisment() {
+    public Advertisement() {
     }
 
-    public Advertisment(String mTitle, String mPrice, String mDescription, String mImageUrl) {
+    public Advertisement(String mTitle, String mPrice, String mDescription, String mImageUrl) {
         this.mTitle = mTitle;
         this.mPrice = mPrice;
         this.mDescription = mDescription;
