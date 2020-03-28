@@ -67,7 +67,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/carPriceTextView"
-            app:srcCompat="@drawable/ic_favorite_border"
+            app:srcCompat="@drawable/ic_favorite_border_red"
             android:contentDescription="@string/isfav" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -48,9 +48,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Advert
         holder.carDescription.setText(advertisementCurrent.getmDescription());
         holder.carTitle.setText(advertisementCurrent.getmTitle());
         if (advertisementCurrent.getFav())
-            holder.carFav.setImageResource(R.drawable.ic_favorite_white);
+            holder.carFav.setImageResource(R.drawable.ic_favorite_red);
         else
-            holder.carFav.setImageResource(R.drawable.ic_favorite_border);
+            holder.carFav.setImageResource(R.drawable.ic_favorite_border_red);
 
         Picasso.get()
                 .load(advertisementCurrent.getmImageUrl())
