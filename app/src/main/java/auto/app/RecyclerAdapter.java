@@ -2,7 +2,10 @@ package auto.app;
 
 
 import android.content.Context;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -22,6 +25,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Advert
 
     private Context context;
     private List<Advertisement> advertisements;
+    private OnItemClickListener listener;
 
     RecyclerAdapter(Context context, List<Advertisement> advertisements) {
         this.context = context;
@@ -61,7 +65,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Advert
         return advertisements.size();
     }
 
-    class AdvertisementViewHolder extends RecyclerView.ViewHolder {
+    class AdvertisementViewHolder extends RecyclerView.ViewHolder
+            implements View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener, View.OnClickListener {
         TextView carPrice;
         TextView carDescription;
         TextView carTitle;
@@ -76,6 +81,59 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Advert
             carImageView = itemView.findViewById(R.id.carImageView);
             carFav = itemView.findViewById(R.id.fav_button);
 
+            itemView.setOnCreateContextMenuListener(this);
+            carFav.setOnClickListener(this);
         }
+
+
+        @Override
+        public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+            MenuItem delete = contextMenu.add(Menu.NONE, 1, 1, "Удалить");
+            MenuItem fav = contextMenu.add(Menu.NONE, 2, 2, "Избранное");
+            MenuItem edit = contextMenu.add(Menu.NONE, 3, 3, "Изменить");
+            delete.setOnMenuItemClickListener(this);
+            fav.setOnMenuItemClickListener(this);
+            edit.setOnMenuItemClickListener(this);
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem menuItem) {
+            if (listener != null) {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION)
+                    switch (menuItem.getItemId()) {
+                        case 1:
+                            listener.onDeleteClick(position);
+                            break;
+                        case 2:
+                            listener.onFavClick(position);
+                            break;
+                        case 3:
+                            listener.onEditClick(position);
+                            break;
+                    }
+            }
+            return false;
+        }
+
+        @Override
+        public void onClick(View view) {
+            int position = getAdapterPosition();
+            if (view.getId() == R.id.fav_button)
+                if (listener != null)
+                    listener.onFavClick(position);
+        }
+    }
+
+    public interface OnItemClickListener {
+        void onFavClick(int position);
+
+        void onDeleteClick(int position);
+
+        void onEditClick(int position);
+    }
+
+    void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
     }
 }

@@ -13,18 +13,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 
 import auto.app.model.Advertisement;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RecyclerAdapter.OnItemClickListener {
+
     private Boolean isFavFilterSelected;
 
     private RecyclerAdapter adapter;
@@ -51,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         advertisements = new ArrayList<>();
         advertisementsAll = new ArrayList<>();
         adapter = new RecyclerAdapter(MainActivity.this, advertisements);
+        adapter.setOnItemClickListener(MainActivity.this);
         recyclerView.setAdapter(adapter);
         storage = FirebaseStorage.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference("cars_advertisement");
@@ -59,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 advertisements.clear();
                 advertisementsAll.clear();
-                Toast.makeText(MainActivity.this, "update", Toast.LENGTH_LONG).show();
 
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     Advertisement advertisement = postSnapshot.getValue(Advertisement.class);
@@ -111,4 +115,39 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    @Override
+    public void onFavClick(int position) {
+        Advertisement selectedItem = advertisements.get(position);
+        final String selectedKey = selectedItem.getKey();
+        selectedItem.setFav(!selectedItem.getFav());
+        databaseReference.child(selectedKey).setValue(selectedItem);
+    }
+
+    @Override
+    public void onDeleteClick(int position) {
+        Advertisement selectedItem = advertisements.get(position);
+        final String selectedKey = selectedItem.getKey();
+
+        StorageReference advRef = storage.getReferenceFromUrl(selectedItem.getmImageUrl());
+        advRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                databaseReference.child(selectedKey).removeValue();
+                Toast.makeText(MainActivity.this, "Удалено", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    @Override
+    public void onEditClick(int position) {
+
+    }
+
 }
