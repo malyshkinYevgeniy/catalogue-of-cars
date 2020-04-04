@@ -147,7 +147,18 @@ public class MainActivity extends AppCompatActivity implements RecyclerAdapter.O
 
     @Override
     public void onEditClick(int position) {
+        Advertisement advertisement = advertisements.get(position);
 
+        AddAdvertisementDialog edit = new AddAdvertisementDialog();
+        Bundle bundle = new Bundle();
+        bundle.putString("url", advertisement.getmImageUrl());
+        bundle.putString("title", advertisement.getmTitle());
+        bundle.putString("price", advertisement.getmPrice());
+        bundle.putString("description", advertisement.getmDescription());
+        bundle.putString("key", advertisement.getKey());
+
+        edit.setArguments(bundle);
+        edit.show(getSupportFragmentManager(), "Edit advertisement");
     }
 
 }

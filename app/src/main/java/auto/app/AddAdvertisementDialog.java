@@ -57,6 +57,7 @@ public class AddAdvertisementDialog extends BottomSheetDialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         final BottomSheetDialog dialog = (BottomSheetDialog) super.onCreateDialog(savedInstanceState);
         view = View.inflate(getContext(), R.layout.add_advertisement_dialog, null);
+
         dialog.setContentView(view);
         mBehavior = BottomSheetBehavior.from((View) view.getParent());
         mStorageRef = FirebaseStorage.getInstance().getReference("cars_pictures");
@@ -72,6 +73,7 @@ public class AddAdvertisementDialog extends BottomSheetDialogFragment {
         price = view.findViewById(R.id.textInputPrice);
         title = view.findViewById(R.id.textInputName);
         description = view.findViewById(R.id.textInputDescription);
+
         Button save_button = view.findViewById(R.id.save_button);
         save_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,11 +91,20 @@ public class AddAdvertisementDialog extends BottomSheetDialogFragment {
                     pd.setMessage("Пожалуйста, подождите . . .");
                     pd.setCancelable(false);
                     pd.show();
-                    uploadData();
+
+                    if (bundle != null)
+                        save();
+                    else
+                        uploadData();
 
                 }
             }
         });
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            fill();
+        }
         return dialog;
     }
 
@@ -192,5 +203,77 @@ public class AddAdvertisementDialog extends BottomSheetDialogFragment {
                 });
     }
 
+    private void fill() {
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            String url = bundle.getString("url");
+            String titleS = bundle.getString("title");
+            String priceS = bundle.getString("price");
+            String descriptionS = bundle.getString("description");
+            Picasso.get()
+                    .load(url)
+                    .placeholder(R.drawable.ic_car)
+                    .centerCrop()
+                    .fit()
+                    .into(carImageView);
+            Objects.requireNonNull(title.getEditText()).setText(titleS);
+            Objects.requireNonNull(price.getEditText()).setText(priceS);
+            Objects.requireNonNull(description.getEditText()).setText(descriptionS);
+            imageUri = Uri.EMPTY;
+        }
+    }
 
+    private void save() {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            String keyS = bundle.getString("key");
+            String urlS = bundle.getString("url");
+            if (imageUri != Uri.EMPTY) {
+                assert urlS != null;
+                StorageReference advRef = storage.getReferenceFromUrl(urlS);
+                advRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        StorageReference fileReference = mStorageRef.child(System.currentTimeMillis() + "." + getFileExtension(imageUri));
+                        mTask = fileReference.putFile(imageUri)
+                                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                        Bundle bundle = getArguments();
+                                        assert bundle != null;
+                                        String keyS = bundle.getString("key");
+
+                                        Task<Uri> urlTask = taskSnapshot.getStorage().getDownloadUrl();
+                                        while (!urlTask.isSuccessful()) {
+                                        }
+                                        String downloadUrl = Objects.requireNonNull(urlTask.getResult()).toString();
+                                        Advertisement advertisement = new Advertisement(Objects.requireNonNull(title.getEditText()).getText().toString(), Objects.requireNonNull(price.getEditText()).getText().toString(), Objects.requireNonNull(description.getEditText()).getText().toString(), downloadUrl);
+                                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("cars_advertisement");
+                                        if (keyS != null)
+                                            databaseReference.child(keyS).setValue(advertisement);
+                                        dismiss();
+                                        pd.dismiss();
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(view.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    }
+                });
+            } else {
+                Advertisement advertisement = new Advertisement(Objects.requireNonNull(title.getEditText()).getText().toString(), Objects.requireNonNull(price.getEditText()).getText().toString(), Objects.requireNonNull(description.getEditText()).getText().toString(), urlS);
+                DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("cars_advertisement");
+                if (keyS != null)
+                    databaseReference.child(keyS).setValue(advertisement);
+                dismiss();
+                pd.dismiss();
+            }
+
+        }
+    }
 }
