@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerAdapter.O
                     item.setIcon(R.drawable.ic_favorite_white);
                 else
                     item.setIcon(R.drawable.ic_favorite_border);
+                changeDataSet();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -161,4 +162,17 @@ public class MainActivity extends AppCompatActivity implements RecyclerAdapter.O
         edit.show(getSupportFragmentManager(), "Edit advertisement");
     }
 
+    private void changeDataSet() {
+        advertisements.clear();
+        for (Advertisement adv : advertisementsAll) {
+            if (isFavFilterSelected) {
+                if (adv.getFav())
+                    advertisements.add(adv);
+            } else
+                advertisements.add(adv);
+        }
+        if (advertisements.size() == 0)
+            Toast.makeText(MainActivity.this, "Объявлений нет", Toast.LENGTH_LONG).show();
+        adapter.notifyDataSetChanged();
+    }
 }
